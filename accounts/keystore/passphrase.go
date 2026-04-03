@@ -140,7 +140,7 @@ func (ks keyStorePassphrase) JoinPath(filename string) string {
 func EncryptDataV3(data, auth []byte, scryptN, scryptP int) (CryptoJSON, error) {
 	salt := make([]byte, 32)
 	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
-		panic("reading from crypto/rand failed: " + err.Error())
+		return CryptoJSON{}, fmt.Errorf("reading from crypto/rand failed: %w", err)
 	}
 	derivedKey, err := scrypt.Key(auth, salt, scryptN, scryptR, scryptP, scryptDKLen)
 	if err != nil {
@@ -150,7 +150,7 @@ func EncryptDataV3(data, auth []byte, scryptN, scryptP int) (CryptoJSON, error) 
 
 	iv := make([]byte, aes.BlockSize) // 16
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic("reading from crypto/rand failed: " + err.Error())
+		return CryptoJSON{}, fmt.Errorf("reading from crypto/rand failed: %w", err)
 	}
 	cipherText, err := aesCTRXOR(encryptKey, data, iv)
 	if err != nil {
